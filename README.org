@@ -1,0 +1,47 @@
+#+Title:        cmbntr.org: org-mode outlining utilities
+#+AUTHOR:       Michael Locher
+#+EMAIL:        cmbntr@gmail.com
+
+* org-mode Utility
+
+- [[https://github.com/cmbntr/cmbntr.org][Github]]
+- [[http://clojars.org/cmbntr/cmbntr.org][Clojars]]
+
+External:
+- [[http://orgmode.org/]]
+
+** Versions
+   | Version | Released   |
+   |   0.0.1 | WIP        |
+  
+** Usage
+
+#+BEGIN_EXAMPLE
+  TODO
+#+END_EXAMPLE
+
+** Dependencies
+
+with leinigen
+
+#+BEGIN_SRC clojure
+[cmbntr/cmbntr.org "0.0.1-SNAPSHOT"]
+#+END_SRC
+
+with maven
+
+#+BEGIN_SRC xml
+<dependency>
+  <groupId>cmbntr</groupId>
+  <artifactId>cmbntr.org</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</dependency>
+#+END_SRC
+
+
+
+* License
+
+Copyright (C) 2012 Michael Locher
+
+Distributed under the Eclipse Public License, the same as Clojure.
