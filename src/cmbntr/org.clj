@@ -1,5 +1,5 @@
 (ns cmbntr.org
-  (:use [clojure.zip :as zip]))
+  (:require [clojure.zip :as zip]))
 
 (defprotocol OutlineZippable
   (zip-branch? [node])
@@ -23,7 +23,10 @@
 
 (def ^:dynamic *outline-level* 0)
 
-(defn println-outline [cs]
+(defn print-outline [o]
+  (emit-outline o))
+
+(defn- println-outline [cs]
   (println cs))
 
 (extend-protocol OutlinePrintable
@@ -72,6 +75,8 @@
   OutlinePrintable
   (emit-outline [this] (print-headline this)))
 
+(defn make-heading [title tags content]
+  (Heading. title tags content))
 
 (defn- print-drawer [name lines]
   (println (str \: name \:))
@@ -99,26 +104,26 @@
 (comment
 
   (-> (make-outline)
-      (append-child (Heading. "EPIC" nil nil))
-      (down)
-      (rightmost)
+      (zip/append-child (Heading. "EPIC" nil nil))
+      (zip/down)
+      (zip/rightmost)
 
-      (append-child (Heading. "Story 1" nil nil))
-      (down)
-      (rightmost)
-      (append-child (PropertiesDrawer. {:foo 99, :bar 42}))
-      (append-child (Checklist. [[:Foo true] [:Bar nil] [:Baz  11]]))
-      (append-child (Heading. "Task 1" nil nil))
-      (up)
+      (zip/append-child (Heading. "Story 1" nil nil))
+      (zip/down)
+      (zip/rightmost)
+      (zip/append-child (PropertiesDrawer. {:foo 99, :bar 42}))
+      (zip/append-child (Checklist. [[:Foo true] [:Bar nil] [:Baz  11]]))
+      (zip/append-child (Heading. "Task 1" nil nil))
+      (zip/up)
  
-      (append-child (Heading. "Story 2" nil nil))
-      (down)
-      (rightmost)
-      (append-child "some text")
-      (append-child (Heading. "Task 2" nil nil))
-      (up)
+      (zip/append-child (Heading. "Story 2" nil nil))
+      (zip/down)
+      (zip/rightmost)
+      (zip/append-child "some text")
+      (zip/append-child (Heading. "Task 2" nil nil))
+      (zip/up)
       
-      root
+      zip/root
       emit-outline)
   
 )
