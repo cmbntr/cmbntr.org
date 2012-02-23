@@ -1,6 +1,8 @@
 (ns cmbntr.org
   (:require [clojure.zip :as zip]))
 
+;; Outline-Zipper
+
 (defprotocol OutlineZippable
   (zip-branch? [node])
   (zip-children [node])
@@ -15,19 +17,15 @@
   (zip-children  [s] (seq s))
   (zip-make-node [_ children] (vec children)))
 
-(defn make-outline []
-  (outline-zip []))
+;; Printing protocol
+
+(def ^:dynamic *outline-level* 0)
 
 (defprotocol OutlinePrintable
   (emit-outline [x]))
 
-(def ^:dynamic *outline-level* 0)
-
 (defn print-outline [o]
   (emit-outline o))
-
-(defn- println-outline [cs]
-  (println cs))
 
 (extend-protocol OutlinePrintable
 
@@ -38,10 +36,12 @@
 
   java.lang.CharSequence
   (emit-outline [cs]
-    (println-outline cs))
+    (println cs))
   
   nil
   (emit-outline [_]))
+
+;; Headings
 
 (defprotocol OutlineHeading
   (heading-title [h])
@@ -59,7 +59,6 @@
     (println (heading-title h))
     (emit-outline (heading-content h))))
 
-
 (defrecord Heading [title tags content]
 
   OutlineZippable
@@ -75,8 +74,7 @@
   OutlinePrintable
   (emit-outline [this] (print-headline this)))
 
-(defn make-heading [title tags content]
-  (Heading. title tags content))
+;; Drawers
 
 (defn- print-drawer [name lines]
   (println (str \: name \:))
@@ -90,6 +88,8 @@
     (print-drawer "PROPERTIES"
                   (for [[k v] props] (format ":%s: %s" (name k) v)))))
 
+;; Checklists
+
 (defn- print-checklist [checklist]
   (doseq [[k v] (:checks checklist)]
     (println (format " [%s] %s"
@@ -101,29 +101,63 @@
   (emit-outline [this]
     (print-checklist this)))
 
+;; Constructor functions
+
+(defn make-outline []
+  (outline-zip []))
+
+(defn make-checklist [checks]
+  (Checklist. checks))
+
+(defn make-properties-drawer [props]
+  (PropertiesDrawer. props))
+
+(defn make-heading
+  ([title] (make-heading title nil nil))
+  ([title tags] (make-heading title tags nil))
+  ([title tags content] (Heading. title tags content))
+  ([title tags props content] (Heading. title tags [(make-properties-drawer props)])))
+
+(defn make-settings [heading-title props]
+  (let [settings (-> (make-heading heading-title [:noexport])
+                     (outline-zip))]
+    
+    (-> (reduce (fn [s [k v]] (zip/append-child s (format "#+%S: %s" (name k) v)))
+                settings props)
+        zip/root)))
+
 (comment
 
   (-> (make-outline)
-      (zip/append-child (Heading. "EPIC" nil nil))
+      (zip/append-child (make-heading "EPIC"))
       (zip/down)
       (zip/rightmost)
 
-      (zip/append-child (Heading. "Story 1" nil nil))
+      (zip/append-child (make-heading "Story 1"))
       (zip/down)
       (zip/rightmost)
-      (zip/append-child (PropertiesDrawer. {:foo 99, :bar 42}))
-      (zip/append-child (Checklist. [[:Foo true] [:Bar nil] [:Baz  11]]))
-      (zip/append-child (Heading. "Task 1" nil nil))
+      (zip/append-child (make-properties-drawer {:foo 99, :bar 42}))
+      (zip/append-child (make-checklist [[:Foo true] [:Bar nil] [:Baz  11]]))
+      (zip/append-child (make-heading "Task 1"))
       (zip/up)
  
-      (zip/append-child (Heading. "Story 2" nil nil))
+      (zip/append-child (make-heading "Story 2"))
       (zip/down)
       (zip/rightmost)
       (zip/append-child "some text")
-      (zip/append-child (Heading. "Task 2" nil nil))
+      (zip/append-child (make-heading "Task 2"))
       (zip/up)
+
+      (zip/append-child
+       (make-settings "Settings"
+                      (partition 2
+                                 [:title "outline title"
+                                  :startup "showall logdone"
+                                  :options "^:nil creator:nil email:nil d:t"
+                                  :todo "TODO(o) | DONE(d)"
+                                  :todo "PENDING(p) | DISCARDED(x) SUBMITTED(s)"])))
       
       zip/root
       emit-outline)
-  
-)
+
+  )
