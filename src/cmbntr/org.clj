@@ -116,7 +116,9 @@
   ([title] (make-heading title nil nil))
   ([title tags] (make-heading title tags nil))
   ([title tags content] (Heading. title tags content))
-  ([title tags props content] (Heading. title tags [(make-properties-drawer props)])))
+  ([title tags props content]
+     (make-heading title tags
+                   (cons (make-properties-drawer props) content))))
 
 (defn make-settings [heading-title props]
   (let [settings (-> (make-heading heading-title [:noexport])
@@ -141,7 +143,7 @@
       (zip/append-child (make-heading "Task 1"))
       (zip/up)
  
-      (zip/append-child (make-heading "Story 2"))
+      (zip/append-child (make-heading "Story 2" #{:foo} {:a 3 :b 8} ["Hello World"]))
       (zip/down)
       (zip/rightmost)
       (zip/append-child "some text")
