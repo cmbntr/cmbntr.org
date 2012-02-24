@@ -48,9 +48,8 @@
   (heading-tags [h])
   (heading-content [h]))
 
-(defn- stars [n]
-  (if (pos? n)
-    (str \* (stars (dec n)))))
+(def ^:private stars
+  (memoize (fn [n] (apply str (repeat n \*)))))
 
 (defn- print-headline [h]
   (binding [*outline-level* (inc *outline-level*)]
