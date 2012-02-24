@@ -67,7 +67,9 @@
   (zip-make-node [this children] (Heading. title tags (vec children)))
 
   OutlineHeading
-  (heading-title [this] title)
+  (heading-title [this] (if (sequential? title)
+                          (->> title (map name) (interpose \space) (apply str))
+                          (name title)))
   (heading-tags [this] tags)
   (heading-content [this] content)
   
@@ -135,7 +137,7 @@
       (zip/down)
       (zip/rightmost)
 
-      (zip/append-child (make-heading "Story 1"))
+      (zip/append-child (make-heading [:TODO "Story 1"]))
       (zip/down)
       (zip/rightmost)
       (zip/append-child (make-properties-drawer {:foo 99, :bar 42}))
