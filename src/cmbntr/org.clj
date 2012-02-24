@@ -51,11 +51,24 @@
 (def ^:private stars
   (memoize (fn [n] (apply str (repeat n \*)))))
 
+(def ^:dynamic *tag-cleaner* #(.replace % \- \_))
+
+(defn- tags-str [tags]
+  (->> tags
+       (map name)
+       (map *tag-cleaner*)
+       (interpose \:)
+       (apply str)
+       (format ":%s:")))
+
 (defn- print-headline [h]
   (binding [*outline-level* (inc *outline-level*)]
     (print (stars *outline-level*))
     (print \space)
-    (println (heading-title h))
+    (print (heading-title h))
+    (if-let [tags (seq (heading-tags h))]
+      (println \space (tags-str tags))
+      (println))
     (emit-outline (heading-content h))))
 
 (defrecord Heading [title tags content]
@@ -143,14 +156,15 @@
       (zip/append-child (make-checklist [[:Foo true] [:Bar nil] [:Baz  11]]))
       (zip/append-child (make-heading "Task 1"))
       (zip/up)
- 
+      
       (zip/append-child (make-heading "Story 2" #{:foo} {:a 3 :b 8} ["Hello World"]))
       (zip/down)
       (zip/rightmost)
       (zip/append-child "some text")
       (zip/append-child (make-heading "Task 2"))
-      (zip/up)
 
+      (zip/up)
+      (zip/up)
       (zip/append-child
        (make-settings "Settings"
                       (partition 2
@@ -159,8 +173,7 @@
                                   :options "^:nil creator:nil email:nil d:t"
                                   :todo "TODO(o) | DONE(d)"
                                   :todo "PENDING(p) | DISCARDED(x) SUBMITTED(s)"])))
-      
-      zip/root
+      (zip/root)
       emit-outline)
 
   )
