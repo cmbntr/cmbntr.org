@@ -3,6 +3,13 @@
   cmbntr.org
   (:require [clojure.zip :as zip]))
 
+;; Body
+
+(defn make-body [& contents]
+  (with-meta
+    (vec contents)
+    {:type :outline}))
+
 ;; Outline-Zipper
 
 (defprotocol OutlineZippable
@@ -17,7 +24,7 @@
   clojure.lang.Sequential
   (zip-branch?   [s] true)
   (zip-children  [s] (seq s))
-  (zip-make-node [_ children] (vec children)))
+  (zip-make-node [_ children] (make-body children)))
 
 ;; Printing protocol
 
@@ -78,7 +85,7 @@
   OutlineZippable
   (zip-branch? [this] true)
   (zip-children [this] content)
-  (zip-make-node [this children] (Heading. title tags (vec children)))
+  (zip-make-node [this children] (Heading. title tags (make-body children)))
 
   OutlineHeading
   (heading-title [this] (if (sequential? title)
@@ -119,8 +126,8 @@
 
 ;; Constructor functions
 
-(defn make-outline []
-  (outline-zip []))
+(defn make-outline [& contents]
+  (outline-zip (apply make-body contents)))
 
 (defn make-checklist [checks]
   (Checklist. checks))
