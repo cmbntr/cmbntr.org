@@ -1,4 +1,6 @@
-(ns cmbntr.org
+(ns  ^{:doc "org-mode outlining utility"
+       :author "Michael Locher <cmbntr@gmail.com>"}
+  cmbntr.org
   (:require [clojure.zip :as zip]))
 
 ;; Outline-Zipper
