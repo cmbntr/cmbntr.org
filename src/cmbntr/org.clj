@@ -17,14 +17,14 @@
   (zip-children [node])
   (zip-make-node [node children]))
 
-(defn outline-zip [root]
-  (zip/zipper zip-branch? zip-children zip-make-node root))
-
 (extend-protocol OutlineZippable
   clojure.lang.Sequential
   (zip-branch?   [s] true)
   (zip-children  [s] (seq s))
   (zip-make-node [_ children] (make-body children)))
+
+(defn outline-zip [root]
+  (zip/zipper zip-branch? zip-children zip-make-node root))
 
 ;; Printing protocol
 
