@@ -21,10 +21,43 @@
   clojure.lang.Sequential
   (zip-branch?   [s] true)
   (zip-children  [s] (seq s))
-  (zip-make-node [_ children] (make-body children)))
+  (zip-make-node [_ children] (apply make-body children)))
+
+(defn- zipper? [z]
+  (contains? (meta z) :zip/make-node))
 
 (defn outline-zip [root]
-  (zip/zipper zip-branch? zip-children zip-make-node root))
+  (if (zipper? root)
+    root
+    (zip/zipper zip-branch? zip-children zip-make-node root)))
+
+;; Navigation
+
+(defn top [outline]
+  (-> outline outline-zip zip/root))
+
+(defn up [outline]
+  (-> outline outline-zip zip/up))
+
+(defn dive-first [outline]
+  (-> outline outline-zip zip/down))
+
+(defn dive-last [outline]
+  (-> outline outline-zip zip/down zip/rightmost))
+
+;; Editing
+
+(defn prepend-sibling [outline item]
+  (-> outline outline-zip (zip/insert-left item)))
+
+(defn append-sibling  [outline item]
+  (-> outline outline-zip (zip/insert-right item)))
+
+(defn prepend-child [outline item]
+  (-> outline outline-zip (zip/insert-child item)))
+
+(defn append-child  [outline item]
+  (-> outline outline-zip (zip/append-child item)))
 
 ;; Printing protocol
 
@@ -40,8 +73,10 @@
 
   clojure.lang.Sequential
   (emit-outline [s]
-    (doseq [x s]
-      (emit-outline x)))
+    (if (zipper? s)
+      (emit-outline (top s))
+      (doseq [x s]
+        (emit-outline x))))
 
   java.lang.CharSequence
   (emit-outline [cs]
@@ -88,7 +123,7 @@
   OutlineZippable
   (zip-branch? [this] true)
   (zip-children [this] content)
-  (zip-make-node [this children] (Heading. title tags (make-body children)))
+  (zip-make-node [this children] (Heading. title tags (apply make-body children)))
 
   OutlineHeading
   (heading-title [this] (if (sequential? title)
@@ -142,7 +177,7 @@
 (defn make-heading
   ([title] (make-heading title nil nil))
   ([title tags] (make-heading title tags nil))
-  ([title tags content] (Heading. title tags content))
+  ([title tags content] (Heading. title tags (apply make-body content)))
   ([title tags props content]
      (make-heading title tags
                    (cons (make-properties-drawer props) content))))
@@ -151,9 +186,9 @@
   (let [settings (-> (make-heading heading-title [:noexport])
                      (outline-zip))]
     
-    (-> (reduce (fn [s [k v]] (zip/append-child s (format "#+%S: %s" (name k) v)))
+    (-> (reduce (fn [s [k v]] (append-child s (format "#+%S: %s" (name k) v)))
                 settings props)
-        zip/root)))
+        top)))
 
 ;; Timestamps
 (defn make-timestamp [t]
@@ -179,28 +214,26 @@
 
 (comment
 
-  (-> (make-outline)
-      (zip/append-child (make-heading "EPIC"))
-      (zip/down)
-      (zip/rightmost)
-
-      (zip/append-child (make-heading [:TODO "Story 1"]))
-      (zip/down)
-      (zip/rightmost)
-      (zip/append-child (make-properties-drawer {:foo 99, :bar 42}))
-      (zip/append-child (make-checklist [[:Foo true] [:Bar nil] [:Baz  11]]))
-      (zip/append-child (make-heading "Task 1"))
-      (zip/up)
+  (-> (make-body)
+      (append-child (make-heading "EPIC"))
+      dive-last
       
-      (zip/append-child (make-heading "Story 2" #{:foo} {:a 3 :b 8} ["Hello World"]))
-      (zip/down)
-      (zip/rightmost)
-      (zip/append-child "some text")
-      (zip/append-child (make-heading "Task 2"))
+      (append-child (make-heading [:TODO "Story 1"]))
+      dive-last
+      
+      (append-child (make-properties-drawer {:foo 99, :bar 42}))
+      (append-child (make-checklist [[:Foo true] [:Bar nil] [:Baz  11]]))
+      (append-child (make-heading "Task 1"))
+      up
+      
+      (append-child (make-heading "Story 2" #{:foo} {:a 3 :b 8} ["Hello World"]))
+      dive-last
+      (append-child "some text")
+      (append-child (make-heading "Task 2"))
 
-      (zip/up)
-      (zip/up)
-      (zip/append-child
+      up
+      up
+      (append-child
        (make-settings "Settings"
                       (partition 2
                                  [:title "outline title"
@@ -208,7 +241,7 @@
                                   :options "^:nil creator:nil email:nil d:t"
                                   :todo "TODO(o) | DONE(d)"
                                   :todo "PENDING(p) | DISCARDED(x) SUBMITTED(s)"])))
-      (zip/root)
+      top
       emit-outline)
 
   )
