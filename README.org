@@ -11,8 +11,8 @@ External:
 - [[http://orgmode.org/]]
 
 ** Versions
-   | Version | Released   |
-   |   0.0.1 | WIP        |
+   | Version |   Released |
+   |   0.0.1 | 2012-02-27 |
   
 ** Usage
 
@@ -25,7 +25,7 @@ External:
 with leinigen
 
 #+BEGIN_SRC clojure
-[cmbntr/cmbntr.org "0.0.1-SNAPSHOT"]
+[cmbntr/cmbntr.org "0.0.1"]
 #+END_SRC
 
 with maven
@@ -34,7 +34,7 @@ with maven
 <dependency>
   <groupId>cmbntr</groupId>
   <artifactId>cmbntr.org</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
 </dependency>
 #+END_SRC
 
