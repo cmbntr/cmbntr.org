@@ -155,6 +155,28 @@
                 settings props)
         zip/root)))
 
+;; Timestamps
+(defn make-timestamp [t]
+  (format "<%s>" (-> t str (.replace \T \space))))
+
+;; Hyperlinks
+
+(defn- anchor-escape [s]
+  (-> s str (.replace \< \{ ) (.replace \> \} )))
+
+(defn anchor [s]
+  (format "<<%s>>" (anchor-escape s)))
+
+(defn- link-escape [s]
+  (-> s str (.replace \[ \{ ) (.replace \] \} )))
+
+(defn link
+  ([target] (link target nil))
+  ([target desc]
+     (if desc
+        (format "[[%s][%s]]" (link-escape target) (link-escape desc))
+        (format "[[%s]]" (link-escape target)))))
+
 (comment
 
   (-> (make-outline)
