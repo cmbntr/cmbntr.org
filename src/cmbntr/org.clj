@@ -50,15 +50,18 @@
   nil
   (emit-outline [_]))
 
+(def ^:private stars
+  (memoize (fn [n] (apply str (repeat n \*)))))
+
+(def ^:private spaces
+  (memoize (fn [n] (apply str (repeat n \space)))))
+
 ;; Headings
 
 (defprotocol OutlineHeading
   (heading-title [h])
   (heading-tags [h])
   (heading-content [h]))
-
-(def ^:private stars
-  (memoize (fn [n] (apply str (repeat n \*)))))
 
 (def ^:dynamic *tag-cleaner* #(.replace % \- \_))
 
@@ -100,10 +103,11 @@
 ;; Drawers
 
 (defn- print-drawer [name lines]
-  (println (str \: name \:))
-  (doseq [l lines]
-    (println l))
-  (println ":END:"))
+  (let [indent (spaces (inc *outline-level*))]
+    (println (str indent \: name \:))
+    (doseq [l lines]
+      (println indent l))
+    (println (str indent ":END:"))))
 
 (defrecord PropertiesDrawer [props]
   OutlinePrintable
