@@ -1,4 +1,4 @@
-(defproject cmbntr/cmbntr.org "0.0.2-SNAPSHOT"
+(defproject cmbntr/cmbntr.org "0.0.2"
   :min-lein-version "2.0.0"
 
   :description "org-mode outlining utilities"
