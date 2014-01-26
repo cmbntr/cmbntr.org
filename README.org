@@ -4,8 +4,8 @@
 
 * org-mode Utility
 
-- [[https://github.com/cmbntr/cmbntr.org][Github]]
-- [[http://clojars.org/cmbntr/cmbntr.org][Clojars]]
+- [[https://github.com/cmbntr/cmbntr%2Eorg][Github]]
+- [[http://clojars.org/cmbntr/cmbntr%2Eorg][Clojars]]
 
 External:
 - [[http://orgmode.org/]]
@@ -13,6 +13,7 @@ External:
 ** Versions
    | Version |   Released |
    |   0.0.1 | 2012-02-27 |
+   |   0.0.2 | 2014-01-26 |
   
 ** Usage
 
@@ -25,7 +26,7 @@ External:
 with leinigen
 
 #+BEGIN_SRC clojure
-[cmbntr/cmbntr.org "0.0.1"]
+[cmbntr/cmbntr.org "0.0.2"]
 #+END_SRC
 
 with maven
@@ -34,7 +35,7 @@ with maven
 <dependency>
   <groupId>cmbntr</groupId>
   <artifactId>cmbntr.org</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 </dependency>
 #+END_SRC
 
